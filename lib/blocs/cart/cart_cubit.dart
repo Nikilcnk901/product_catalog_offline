@@ -9,8 +9,29 @@ class CartCubit extends Cubit<CartState> {
   CartCubit(this._storage) : super(const CartState());
 
   final CartStorage _storage;
+  Future<void> _writes = Future<void>.value();
 
-  Future<void> loadCart() async {
+  Future<void> loadCart() {
+    return _run(_readCart);
+  }
+
+  Future<void> addProduct(Product product) {
+    return _run(() => _addProduct(product));
+  }
+
+  Future<void> increaseQuantity(int productId) {
+    return _run(() => _changeQuantity(productId, 1));
+  }
+
+  Future<void> decreaseQuantity(int productId) {
+    return _run(() => _changeQuantity(productId, -1));
+  }
+
+  Future<void> removeProduct(int productId) {
+    return _run(() => _removeProduct(productId));
+  }
+
+  Future<void> _readCart() async {
     emit(state.copyWith(status: CartStatus.loading, clearError: true));
 
     try {
@@ -22,7 +43,7 @@ class CartCubit extends Cubit<CartState> {
     }
   }
 
-  Future<void> addProduct(Product product) async {
+  Future<void> _addProduct(Product product) async {
     final items = [...state.items];
     final index = items.indexWhere((item) => item.productId == product.id);
 
@@ -44,15 +65,7 @@ class CartCubit extends Cubit<CartState> {
     await _persist(items);
   }
 
-  Future<void> increaseQuantity(int productId) {
-    return _changeQuantity(productId, 1);
-  }
-
-  Future<void> decreaseQuantity(int productId) {
-    return _changeQuantity(productId, -1);
-  }
-
-  Future<void> removeProduct(int productId) async {
+  Future<void> _removeProduct(int productId) async {
     try {
       await _storage.removeItem(productId);
       if (isClosed) return;
@@ -104,5 +117,11 @@ class CartCubit extends Cubit<CartState> {
   void _emitFailure(String message) {
     if (isClosed) return;
     emit(state.copyWith(status: CartStatus.failure, errorMessage: message));
+  }
+
+  Future<void> _run(Future<void> Function() action) {
+    final result = _writes.then((_) => action());
+    _writes = result.then<void>((_) {}, onError: (Object _, StackTrace _) {});
+    return result;
   }
 }

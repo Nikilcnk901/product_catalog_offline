@@ -9,6 +9,8 @@ class ProductCubit extends Cubit<ProductState> {
   ProductCubit(this._repository) : super(const ProductState());
 
   final ProductRepository _repository;
+  int _listRequestId = 0;
+  int _detailsRequestId = 0;
 
   Future<void> loadProducts() {
     return _loadList(query: '', fetch: _repository.getProducts);
@@ -26,6 +28,7 @@ class ProductCubit extends Cubit<ProductState> {
   }
 
   Future<void> loadProduct(int id) async {
+    final requestId = ++_detailsRequestId;
     emit(
       state.copyWith(
         detailsStatus: ProductDetailsStatus.loading,
@@ -36,7 +39,7 @@ class ProductCubit extends Cubit<ProductState> {
 
     try {
       final product = await _repository.getProduct(id);
-      if (isClosed) return;
+      if (isClosed || requestId != _detailsRequestId) return;
       emit(
         state.copyWith(
           detailsStatus: ProductDetailsStatus.success,
@@ -44,8 +47,10 @@ class ProductCubit extends Cubit<ProductState> {
         ),
       );
     } on ProductApiException catch (error) {
+      if (requestId != _detailsRequestId) return;
       _emitDetailsFailure(error.message);
     } catch (_) {
+      if (requestId != _detailsRequestId) return;
       _emitDetailsFailure('Something went wrong while loading this product.');
     }
   }
@@ -54,6 +59,7 @@ class ProductCubit extends Cubit<ProductState> {
     required String query,
     required Future<List<Product>> Function() fetch,
   }) async {
+    final requestId = ++_listRequestId;
     emit(
       state.copyWith(
         listStatus: ProductListStatus.loading,
@@ -64,7 +70,7 @@ class ProductCubit extends Cubit<ProductState> {
 
     try {
       final products = await fetch();
-      if (isClosed) return;
+      if (isClosed || requestId != _listRequestId) return;
       emit(
         state.copyWith(
           listStatus: ProductListStatus.success,
@@ -72,8 +78,10 @@ class ProductCubit extends Cubit<ProductState> {
         ),
       );
     } on ProductApiException catch (error) {
+      if (requestId != _listRequestId) return;
       _emitListFailure(error.message);
     } catch (_) {
+      if (requestId != _listRequestId) return;
       _emitListFailure('Something went wrong while loading products.');
     }
   }
