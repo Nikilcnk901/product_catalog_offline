@@ -23,9 +23,6 @@ class ProductState {
   final Product? selectedProduct;
   final String? detailsErrorMessage;
 
-  bool get isEmpty =>
-      listStatus == ProductListStatus.success && products.isEmpty;
-
   ProductState copyWith({
     ProductListStatus? listStatus,
     List<Product>? products,

@@ -49,10 +49,6 @@ class CartStorage {
     return saveItems(remaining);
   }
 
-  Future<void> clear() {
-    return _box.delete(_itemsKey);
-  }
-
   Box<dynamic> get _box {
     if (!Hive.isBoxOpen(_boxName)) {
       throw StateError('Cart storage is not open.');

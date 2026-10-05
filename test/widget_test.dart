@@ -94,6 +94,56 @@ void main() {
     expect(storage.readItems(), isEmpty);
   });
 
+  testWidgets('quantity stays in sync across list, search, details, and cart', (
+    tester,
+  ) async {
+    await tester.pumpWidget(_catalogApp(storage, _CatalogAdapter()));
+    await _pumpUntil(tester, find.text('Notebook'));
+
+    await tester.tap(find.text('Add to Cart'));
+    await _flushCartWrites(tester);
+    expect(storage.readItems().single.quantity, 1);
+
+    await tester.tap(find.byTooltip('Increase quantity'));
+    await _flushCartWrites(tester);
+    expect(storage.readItems().single.quantity, 2);
+    expect(find.text('2'), findsWidgets);
+
+    await tester.enterText(find.byType(TextField), 'note');
+    await tester.pump(const Duration(milliseconds: 500));
+    await _pumpUntil(tester, find.text('Notebook'));
+    expect(find.text('2'), findsWidgets);
+    expect(find.text('Add to Cart'), findsNothing);
+
+    await tester.tap(find.text('Notebook'));
+    await _pumpUntil(tester, find.text('A ruled notebook'));
+    expect(
+      find.descendant(
+        of: find.byType(ProductDetailsScreen),
+        matching: find.text('2'),
+      ),
+      findsWidgets,
+    );
+    expect(
+      find.descendant(
+        of: find.byType(ProductDetailsScreen),
+        matching: find.text('Add to Cart'),
+      ),
+      findsNothing,
+    );
+
+    await tester.tap(find.byTooltip('Back'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+    await tester.tap(find.byTooltip('Cart'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+
+    expect(find.text('Items: 2'), findsOneWidget);
+    expect(find.text('Total: \$25.00'), findsOneWidget);
+    expect(storage.readItems().single.quantity, 2);
+  });
+
   testWidgets('search shows an empty state and can return to the catalog', (
     tester,
   ) async {
@@ -159,11 +209,6 @@ class _MemoryCartStorage extends CartStorage {
   @override
   Future<void> removeItem(int productId) async {
     _items.removeWhere((item) => item.productId == productId);
-  }
-
-  @override
-  Future<void> clear() async {
-    _items.clear();
   }
 }
 

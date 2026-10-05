@@ -59,21 +59,32 @@ void main() {
     await restored.increaseQuantity(product.id);
     expect(restored.state.totalQuantity, 2);
     expect(restored.state.totalPrice, 25);
-
-    await restored.decreaseQuantity(product.id);
-    expect(restored.state.totalQuantity, 1);
-
-    await restored.decreaseQuantity(product.id);
-    expect(restored.state.items, isEmpty);
-
-    await restored.addProduct(product);
-    await restored.removeProduct(product.id);
-    expect(restored.state.items, isEmpty);
-    expect(storage.readItems(), isEmpty);
-
-    await restored.addProduct(product);
-    await storage.clear();
-    expect(storage.readItems(), isEmpty);
     await restored.close();
+
+    final afterEdit = CartCubit(storage);
+    await afterEdit.loadCart();
+    expect(afterEdit.state.totalQuantity, 2);
+    expect(afterEdit.state.totalPrice, 25);
+    expect(storage.readItems().single.quantity, 2);
+
+    await afterEdit.decreaseQuantity(product.id);
+    expect(afterEdit.state.totalQuantity, 1);
+    expect(afterEdit.state.totalPrice, 12.5);
+
+    await afterEdit.decreaseQuantity(product.id);
+    expect(afterEdit.state.items, isEmpty);
+
+    await afterEdit.addProduct(product);
+    await afterEdit.removeProduct(product.id);
+    expect(afterEdit.state.items, isEmpty);
+    expect(afterEdit.state.totalQuantity, 0);
+    expect(afterEdit.state.totalPrice, 0);
+    await afterEdit.close();
+
+    final afterRemove = CartCubit(storage);
+    await afterRemove.loadCart();
+    expect(afterRemove.state.items, isEmpty);
+    expect(storage.readItems(), isEmpty);
+    await afterRemove.close();
   });
 }
