@@ -42,12 +42,13 @@ class _ProductListScreenState extends State<ProductListScreen> {
       appBar: AppBar(
         title: const Text('Products'),
         bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(64),
+          preferredSize: const Size.fromHeight(68),
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 0, 4, 12),
+            padding: const EdgeInsets.fromLTRB(16, 0, 8, 12),
             child: Row(
               children: [
                 Expanded(child: _searchField()),
+                const SizedBox(width: 4),
                 _CartButton(onPressed: () => _openCart(context)),
               ],
             ),
@@ -103,7 +104,11 @@ class _ProductListScreenState extends State<ProductListScreen> {
       onSubmitted: _submitSearch,
       decoration: InputDecoration(
         hintText: 'Search products',
-        prefixIcon: const Icon(Icons.search),
+        prefixIcon: const Icon(Icons.search, size: 22),
+        prefixIconConstraints: const BoxConstraints(
+          minWidth: 44,
+          minHeight: 44,
+        ),
         suffixIcon: ValueListenableBuilder<TextEditingValue>(
           valueListenable: _searchController,
           builder: (context, value, _) {
@@ -190,13 +195,13 @@ class _ProductGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GridView.builder(
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
       keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
       gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-        maxCrossAxisExtent: 220,
-        mainAxisSpacing: 12,
-        crossAxisSpacing: 12,
-        childAspectRatio: 0.66,
+        maxCrossAxisExtent: 240,
+        mainAxisSpacing: 16,
+        crossAxisSpacing: 16,
+        childAspectRatio: 0.62,
       ),
       itemCount: products.length,
       itemBuilder: (context, index) {
@@ -224,14 +229,8 @@ class _ProductCard extends StatelessWidget {
 
     return Card(
       clipBehavior: Clip.antiAlias,
-      elevation: 0,
-      color: colorScheme.surfaceContainerLow,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: colorScheme.outlineVariant),
-      ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Expanded(
             child: InkWell(
@@ -239,9 +238,17 @@ class _ProductCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Expanded(child: ProductImage(url: product.thumbnail)),
+                  Expanded(
+                    child: ColoredBox(
+                      color: colorScheme.surfaceContainerHighest,
+                      child: ProductImage(
+                        url: product.thumbnail,
+                        fit: BoxFit.contain,
+                      ),
+                    ),
+                  ),
                   Padding(
-                    padding: const EdgeInsets.fromLTRB(12, 10, 12, 0),
+                    padding: const EdgeInsets.fromLTRB(12, 12, 12, 0),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -256,21 +263,22 @@ class _ProductCard extends StatelessWidget {
                           children: [
                             Text(
                               formatPrice(product.price),
-                              style: theme.textTheme.titleSmall?.copyWith(
+                              style: theme.textTheme.titleMedium?.copyWith(
                                 color: colorScheme.primary,
-                                fontWeight: FontWeight.w600,
                               ),
                             ),
                             const Spacer(),
                             Icon(
-                              Icons.star,
+                              Icons.star_rounded,
                               size: 16,
                               color: Colors.amber.shade700,
                             ),
-                            const SizedBox(width: 4),
+                            const SizedBox(width: 2),
                             Text(
                               product.rating.toStringAsFixed(1),
-                              style: theme.textTheme.bodyMedium,
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                color: colorScheme.onSurfaceVariant,
+                              ),
                             ),
                           ],
                         ),
@@ -282,7 +290,7 @@ class _ProductCard extends StatelessWidget {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.fromLTRB(12, 8, 12, 12),
+            padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
             child: CartQuantityControl(product: product),
           ),
         ],

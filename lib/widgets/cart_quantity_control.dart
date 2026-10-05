@@ -60,14 +60,17 @@ class _AddToCartButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: expanded ? double.infinity : null,
+      width: double.infinity,
       child: FilledButton(
         onPressed: onPressed,
         style: FilledButton.styleFrom(
           visualDensity: expanded
               ? VisualDensity.standard
               : VisualDensity.compact,
-          padding: const EdgeInsets.symmetric(horizontal: 12),
+          padding: EdgeInsets.symmetric(
+            horizontal: 12,
+            vertical: expanded ? 14 : 8,
+          ),
         ),
         child: const Text('Add to Cart'),
       ),
@@ -90,34 +93,45 @@ class _QuantityStepper extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     final buttonConstraints = expanded
-        ? null
-        : const BoxConstraints.tightFor(width: 32, height: 32);
+        ? const BoxConstraints.tightFor(width: 44, height: 44)
+        : const BoxConstraints.tightFor(width: 36, height: 36);
 
-    return Row(
-      mainAxisAlignment: expanded
-          ? MainAxisAlignment.center
-          : MainAxisAlignment.start,
-      mainAxisSize: expanded ? MainAxisSize.max : MainAxisSize.min,
-      children: [
-        IconButton(
-          tooltip: 'Decrease quantity',
-          visualDensity: VisualDensity.compact,
-          padding: EdgeInsets.zero,
-          constraints: buttonConstraints,
-          onPressed: onDecrease,
-          icon: const Icon(Icons.remove),
-        ),
-        Text('$quantity', style: Theme.of(context).textTheme.titleMedium),
-        IconButton(
-          tooltip: 'Increase quantity',
-          visualDensity: VisualDensity.compact,
-          padding: EdgeInsets.zero,
-          constraints: buttonConstraints,
-          onPressed: onIncrease,
-          icon: const Icon(Icons.add),
-        ),
-      ],
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: colorScheme.outlineVariant),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          IconButton(
+            tooltip: 'Decrease quantity',
+            visualDensity: VisualDensity.compact,
+            padding: EdgeInsets.zero,
+            constraints: buttonConstraints,
+            onPressed: onDecrease,
+            icon: Icon(Icons.remove, size: expanded ? 22 : 18),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 4),
+            child: Text(
+              '$quantity',
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.titleSmall,
+            ),
+          ),
+          IconButton(
+            tooltip: 'Increase quantity',
+            visualDensity: VisualDensity.compact,
+            padding: EdgeInsets.zero,
+            constraints: buttonConstraints,
+            onPressed: onIncrease,
+            icon: Icon(Icons.add, size: expanded ? 22 : 18),
+          ),
+        ],
+      ),
     );
   }
 }

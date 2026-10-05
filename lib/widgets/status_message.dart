@@ -20,13 +20,24 @@ class StatusMessage extends StatelessWidget {
     final label = actionLabel;
     final action = onAction;
 
+    final colorScheme = theme.colorScheme;
+
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(24),
+        padding: const EdgeInsets.all(32),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, size: 40, color: theme.colorScheme.primary),
+            DecoratedBox(
+              decoration: BoxDecoration(
+                color: colorScheme.surfaceContainerHighest,
+                shape: BoxShape.circle,
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Icon(icon, size: 28, color: colorScheme.primary),
+              ),
+            ),
             const SizedBox(height: 16),
             Text(
               message,
@@ -34,7 +45,7 @@ class StatusMessage extends StatelessWidget {
               style: theme.textTheme.titleMedium,
             ),
             if (label != null && action != null) ...[
-              const SizedBox(height: 16),
+              const SizedBox(height: 20),
               FilledButton(onPressed: action, child: Text(label)),
             ],
           ],

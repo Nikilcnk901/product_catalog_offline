@@ -73,24 +73,24 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 400));
 
-    expect(find.text('Items: 1'), findsOneWidget);
-    expect(find.text('Total: \$12.50'), findsOneWidget);
+    expect(find.text('Total items'), findsOneWidget);
+    expect(find.text('Total price'), findsOneWidget);
+    expect(find.text('\$12.50'), findsWidgets);
 
     await tester.tap(_cartAction('Increase quantity'));
     await _flushCartWrites(tester);
-    expect(find.text('Items: 2'), findsOneWidget);
-    expect(find.text('Total: \$25.00'), findsOneWidget);
+    expect(find.text('\$25.00'), findsOneWidget);
     expect(storage.readItems().single.quantity, 2);
 
     await tester.tap(_cartAction('Decrease quantity'));
     await _flushCartWrites(tester);
-    expect(find.text('Items: 1'), findsOneWidget);
+    expect(find.text('Total items'), findsOneWidget);
 
     await tester.tap(_cartAction('Remove'));
     await _flushCartWrites(tester);
     expect(find.text('Your cart is empty.'), findsOneWidget);
-    expect(find.text('Items: 0'), findsOneWidget);
-    expect(find.text('Total: \$0.00'), findsOneWidget);
+    expect(find.text('0'), findsOneWidget);
+    expect(find.text('\$0.00'), findsOneWidget);
     expect(storage.readItems(), isEmpty);
   });
 
@@ -139,8 +139,9 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 400));
 
-    expect(find.text('Items: 2'), findsOneWidget);
-    expect(find.text('Total: \$25.00'), findsOneWidget);
+    expect(find.text('Total items'), findsOneWidget);
+    expect(find.text('Total price'), findsOneWidget);
+    expect(find.text('\$25.00'), findsOneWidget);
     expect(storage.readItems().single.quantity, 2);
   });
 

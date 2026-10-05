@@ -45,13 +45,25 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
         return Scaffold(
           appBar: AppBar(title: Text(loaded ? product.title : 'Product')),
           bottomNavigationBar: loaded
-              ? SafeArea(
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-                    child: CartQuantityControl(
-                      product: product,
-                      expanded: true,
-                      onAdded: _showAddedMessage,
+              ? Material(
+                  color: Theme.of(context).colorScheme.surface,
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      border: Border(
+                        top: BorderSide(
+                          color: Theme.of(context).colorScheme.outlineVariant,
+                        ),
+                      ),
+                    ),
+                    child: SafeArea(
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+                        child: CartQuantityControl(
+                          product: product,
+                          expanded: true,
+                          onAdded: _showAddedMessage,
+                        ),
+                      ),
                     ),
                   ),
                 )
@@ -113,7 +125,7 @@ class _ProductDetailsBody extends StatelessWidget {
       children: [
         _ProductGallery(urls: _imageUrls(product)),
         Padding(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.fromLTRB(16, 20, 16, 24),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -121,29 +133,61 @@ class _ProductDetailsBody extends StatelessWidget {
               const SizedBox(height: 8),
               Text(
                 formatPrice(product.price),
-                style: theme.textTheme.titleLarge?.copyWith(
+                style: theme.textTheme.headlineSmall?.copyWith(
                   color: colorScheme.primary,
-                  fontWeight: FontWeight.w600,
                 ),
               ),
               const SizedBox(height: 8),
               Row(
                 children: [
-                  Icon(Icons.star, size: 18, color: Colors.amber.shade700),
+                  Icon(
+                    Icons.star_rounded,
+                    size: 18,
+                    color: Colors.amber.shade700,
+                  ),
                   const SizedBox(width: 4),
                   Text(
                     product.rating.toStringAsFixed(1),
-                    style: theme.textTheme.bodyLarge,
+                    style: theme.textTheme.bodyLarge?.copyWith(
+                      color: colorScheme.onSurfaceVariant,
+                    ),
                   ),
                 ],
               ),
-              const SizedBox(height: 16),
-              _DetailFact(
-                label: 'Category',
-                value: _displayLabel(product.category),
+              const SizedBox(height: 20),
+              DecoratedBox(
+                decoration: BoxDecoration(
+                  color: colorScheme.surfaceContainerLow,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: colorScheme.outlineVariant),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(12, 12, 12, 4),
+                  child: Column(
+                    children: [
+                      _DetailFact(
+                        label: 'Category',
+                        value: _displayLabel(product.category),
+                      ),
+                      _DetailFact(
+                        label: 'Brand',
+                        value: _displayLabel(product.brand),
+                      ),
+                      _DetailFact(
+                        label: 'Stock',
+                        value: _stockLabel(product.stock),
+                      ),
+                    ],
+                  ),
+                ),
               ),
-              _DetailFact(label: 'Brand', value: _displayLabel(product.brand)),
-              _DetailFact(label: 'Stock', value: _stockLabel(product.stock)),
+              const SizedBox(height: 20),
+              Text(
+                'Description',
+                style: theme.textTheme.titleSmall?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
+                ),
+              ),
               const SizedBox(height: 8),
               Text(product.description, style: theme.textTheme.bodyLarge),
             ],
@@ -178,32 +222,45 @@ class _ProductGalleryState extends State<_ProductGallery> {
     final colorScheme = Theme.of(context).colorScheme;
 
     if (urls.isEmpty) {
-      return const SizedBox(
-        height: 240,
-        width: double.infinity,
-        child: ProductImage(url: ''),
+      return const Padding(
+        padding: EdgeInsets.fromLTRB(16, 8, 16, 0),
+        child: ClipRRect(
+          borderRadius: BorderRadius.all(Radius.circular(12)),
+          child: SizedBox(
+            height: 280,
+            width: double.infinity,
+            child: ProductImage(url: ''),
+          ),
+        ),
       );
     }
 
     return Column(
       children: [
-        ColoredBox(
-          color: colorScheme.surfaceContainerHighest,
-          child: SizedBox(
-            height: 240,
-            width: double.infinity,
-            child: urls.length == 1
-                ? ProductImage(url: urls.first, fit: BoxFit.contain)
-                : PageView.builder(
-                    itemCount: urls.length,
-                    onPageChanged: (index) => setState(() => _index = index),
-                    itemBuilder: (context, index) {
-                      return ProductImage(
-                        url: urls[index],
-                        fit: BoxFit.contain,
-                      );
-                    },
-                  ),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+          child: ClipRRect(
+            borderRadius: const BorderRadius.all(Radius.circular(12)),
+            child: ColoredBox(
+              color: colorScheme.surfaceContainerHighest,
+              child: SizedBox(
+                height: 280,
+                width: double.infinity,
+                child: urls.length == 1
+                    ? ProductImage(url: urls.first, fit: BoxFit.contain)
+                    : PageView.builder(
+                        itemCount: urls.length,
+                        onPageChanged: (index) =>
+                            setState(() => _index = index),
+                        itemBuilder: (context, index) {
+                          return ProductImage(
+                            url: urls[index],
+                            fit: BoxFit.contain,
+                          );
+                        },
+                      ),
+              ),
+            ),
           ),
         ),
         if (urls.length > 1)
