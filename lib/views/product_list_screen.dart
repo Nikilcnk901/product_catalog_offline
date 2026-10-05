@@ -9,6 +9,7 @@ import '../blocs/product/product_cubit.dart';
 import '../blocs/product/product_state.dart';
 import '../core/format/price_format.dart';
 import '../models/product.dart';
+import '../widgets/cart_quantity_control.dart';
 import '../widgets/product_image.dart';
 import '../widgets/status_message.dart';
 import 'cart_screen.dart';
@@ -229,47 +230,62 @@ class _ProductCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         side: BorderSide(color: colorScheme.outlineVariant),
       ),
-      child: InkWell(
-        onTap: onTap,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(child: ProductImage(url: product.thumbnail)),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            child: InkWell(
+              onTap: onTap,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    product.title,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: theme.textTheme.titleSmall,
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      Text(
-                        formatPrice(product.price),
-                        style: theme.textTheme.titleSmall?.copyWith(
-                          color: colorScheme.primary,
-                          fontWeight: FontWeight.w600,
+                  Expanded(child: ProductImage(url: product.thumbnail)),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(12, 10, 12, 0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          product.title,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: theme.textTheme.titleSmall,
                         ),
-                      ),
-                      const Spacer(),
-                      Icon(Icons.star, size: 16, color: Colors.amber.shade700),
-                      const SizedBox(width: 4),
-                      Text(
-                        product.rating.toStringAsFixed(1),
-                        style: theme.textTheme.bodyMedium,
-                      ),
-                    ],
+                        const SizedBox(height: 8),
+                        Row(
+                          children: [
+                            Text(
+                              formatPrice(product.price),
+                              style: theme.textTheme.titleSmall?.copyWith(
+                                color: colorScheme.primary,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            const Spacer(),
+                            Icon(
+                              Icons.star,
+                              size: 16,
+                              color: Colors.amber.shade700,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              product.rating.toStringAsFixed(1),
+                              style: theme.textTheme.bodyMedium,
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ),
             ),
-          ],
-        ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(12, 8, 12, 12),
+            child: CartQuantityControl(product: product),
+          ),
+        ],
       ),
     );
   }

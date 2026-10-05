@@ -7,6 +7,7 @@ import '../blocs/product/product_cubit.dart';
 import '../blocs/product/product_state.dart';
 import '../core/format/price_format.dart';
 import '../models/product.dart';
+import '../widgets/cart_quantity_control.dart';
 import '../widgets/product_image.dart';
 import '../widgets/status_message.dart';
 
@@ -20,8 +21,6 @@ class ProductDetailsScreen extends StatefulWidget {
 }
 
 class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
-  var _adding = false;
-
   @override
   void initState() {
     super.initState();
@@ -49,9 +48,10 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
               ? SafeArea(
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-                    child: FilledButton(
-                      onPressed: _adding ? null : () => _addToCart(product),
-                      child: const Text('Add to Cart'),
+                    child: CartQuantityControl(
+                      product: product,
+                      expanded: true,
+                      onAdded: _showAddedMessage,
                     ),
                   ),
                 )
@@ -87,24 +87,15 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
     return const Center(child: CircularProgressIndicator());
   }
 
-  Future<void> _addToCart(Product product) async {
-    if (_adding) return;
-    setState(() => _adding = true);
-    final cart = context.read<CartCubit>();
-
-    try {
-      await cart.addProduct(product);
-      if (!mounted) return;
-      final failed = cart.state.status == CartStatus.failure;
-      final message = failed
-          ? (cart.state.errorMessage ?? 'Could not update the cart.')
-          : '${product.title} added to cart';
-      ScaffoldMessenger.of(context)
-        ..hideCurrentSnackBar()
-        ..showSnackBar(SnackBar(content: Text(message)));
-    } finally {
-      if (mounted) setState(() => _adding = false);
-    }
+  void _showAddedMessage(CartCubit cart) {
+    final product = context.read<ProductCubit>().state.selectedProduct;
+    final failed = cart.state.status == CartStatus.failure;
+    final message = failed
+        ? (cart.state.errorMessage ?? 'Could not update the cart.')
+        : '${product?.title ?? 'Item'} added to cart';
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(content: Text(message)));
   }
 }
 

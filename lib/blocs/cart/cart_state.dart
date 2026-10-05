@@ -13,6 +13,13 @@ class CartState {
   final List<CartItem> items;
   final String? errorMessage;
 
+  int quantityOf(int productId) {
+    for (final item in items) {
+      if (item.productId == productId) return item.quantity;
+    }
+    return 0;
+  }
+
   int get totalQuantity {
     var total = 0;
     for (final item in items) {

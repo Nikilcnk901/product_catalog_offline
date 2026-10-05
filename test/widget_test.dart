@@ -12,6 +12,8 @@ import 'package:product_catalog_offline_cart/data/local/cart_storage.dart';
 import 'package:product_catalog_offline_cart/data/remote/product_api.dart';
 import 'package:product_catalog_offline_cart/data/repositories/product_repository.dart';
 import 'package:product_catalog_offline_cart/models/cart_item.dart';
+import 'package:product_catalog_offline_cart/views/cart_screen.dart';
+import 'package:product_catalog_offline_cart/views/product_details_screen.dart';
 import 'package:product_catalog_offline_cart/views/product_list_screen.dart';
 
 void main() {
@@ -36,15 +38,27 @@ void main() {
     expect(find.text('Paper Co'), findsOneWidget);
     expect(find.text('8 in stock'), findsOneWidget);
 
-    await tester.tap(find.text('Add to Cart'));
+    await tester.tap(
+      find.descendant(
+        of: find.byType(ProductDetailsScreen),
+        matching: find.text('Add to Cart'),
+      ),
+    );
     await _flushCartWrites(tester);
 
     expect(find.text('Notebook added to cart'), findsAtLeastNWidgets(1));
     expect(storage.readItems().single.quantity, 1);
     expect(storage.readItems().single.price, 12.5);
+    expect(
+      find.descendant(
+        of: find.byType(ProductDetailsScreen),
+        matching: find.text('1'),
+      ),
+      findsWidgets,
+    );
 
     ScaffoldMessenger.of(
-      tester.element(find.text('Add to Cart')),
+      tester.element(find.text('A ruled notebook')),
     ).clearSnackBars();
     await tester.pump();
     await tester.tap(find.byTooltip('Back'));
@@ -52,6 +66,9 @@ void main() {
     await tester.pump(const Duration(milliseconds: 400));
 
     expect(find.text('Products'), findsOneWidget);
+    expect(find.text('Add to Cart'), findsNothing);
+    expect(find.text('1'), findsWidgets);
+
     await tester.tap(find.byTooltip('Cart'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 400));
@@ -59,17 +76,17 @@ void main() {
     expect(find.text('Items: 1'), findsOneWidget);
     expect(find.text('Total: \$12.50'), findsOneWidget);
 
-    await tester.tap(find.byTooltip('Increase quantity'));
+    await tester.tap(_cartAction('Increase quantity'));
     await _flushCartWrites(tester);
     expect(find.text('Items: 2'), findsOneWidget);
     expect(find.text('Total: \$25.00'), findsOneWidget);
     expect(storage.readItems().single.quantity, 2);
 
-    await tester.tap(find.byTooltip('Decrease quantity'));
+    await tester.tap(_cartAction('Decrease quantity'));
     await _flushCartWrites(tester);
     expect(find.text('Items: 1'), findsOneWidget);
 
-    await tester.tap(find.byTooltip('Remove'));
+    await tester.tap(_cartAction('Remove'));
     await _flushCartWrites(tester);
     expect(find.text('Your cart is empty.'), findsOneWidget);
     expect(find.text('Items: 0'), findsOneWidget);
@@ -102,6 +119,13 @@ void main() {
     await tester.tap(find.text('Retry'));
     await _pumpUntil(tester, find.text('Notebook'));
   });
+}
+
+Finder _cartAction(String tooltip) {
+  return find.descendant(
+    of: find.byType(CartScreen),
+    matching: find.byTooltip(tooltip),
+  );
 }
 
 Future<void> _pumpUntil(WidgetTester tester, Finder finder) async {
